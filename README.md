@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/29465970/README.md)
 # 우종국 | Backend Portfolio
 
 Java/Spring 기반 백엔드 개발자로 서비스 안정성과 운영 효율을 함께 고민해온 개발자입니다.  
