@@ -1,0 +1,108 @@
+# 데이터 연계 솔루션 구축
+
+## Overview
+
+API 기반 이기종 데이터베이스 연계 플랫폼을 구축한 프로젝트입니다.  
+여러 서비스를 연계하고 관리하는 구조에서 운영 안정성과 확장성을 높이기 위해 MSA 기반 구조, 서비스 이중화, CI/CD, 모니터링 환경을 함께 구성했습니다.
+
+- **기간:** 2026.02 ~ 2026.06
+- **참여 인원:** 2명
+- **역할:** 백엔드 개발, 서비스 구조 설계, 배포/모니터링 환경 구성, SAP 연계 프로세스 구현
+- **사용기술:** Java, Spring Boot, Spring Cloud, Vue.js, MS-SQL, Jenkins, CI/CD, Prometheus, Grafana, Ubuntu, SAP JCo Connector, RFC, ETL, S/4HANA
+
+## Architecture
+
+신규 데이터 연계 솔루션은 여러 시스템을 연계하는 구조였기 때문에, 단일 애플리케이션에 기능을 몰아넣기보다 서비스 경계와 운영 흐름을 나누는 방향으로 설계했습니다.
+
+### Architecture Diagram
+
+| Client | Gateway | Backend Services | External / Data | DevOps / Monitoring |
+|---|---|---|---|---|
+| <img src="https://cdn.simpleicons.org/vuedotjs/4FC08D" width="28" alt="Vue.js"><br>Vue.js Admin | <img src="https://cdn.simpleicons.org/spring/6DB33F" width="28" alt="Spring Cloud"><br>Spring Cloud Gateway | <img src="https://cdn.simpleicons.org/springboot/6DB33F" width="28" alt="Spring Boot"><br>Integration API<br><br><img src="https://cdn.simpleicons.org/springboot/6DB33F" width="28" alt="Spring Boot"><br>Batch / Scheduler | <img src="https://cdn.simpleicons.org/sap/0FAAFF" width="28" alt="SAP"><br>SAP ECC / RFC<br><br><img src="https://cdn.simpleicons.org/sap/0FAAFF" width="28" alt="SAP HANA"><br>S/4HANA<br><br><img src="https://cdn.simpleicons.org/microsoftsqlserver/CC2927" width="28" alt="MS-SQL"><br>MS-SQL | <img src="https://cdn.simpleicons.org/jenkins/D24939" width="28" alt="Jenkins"><br>Jenkins CI/CD<br><br><img src="https://cdn.simpleicons.org/prometheus/E6522C" width="28" alt="Prometheus"><br>Prometheus<br><br><img src="https://cdn.simpleicons.org/grafana/F46800" width="28" alt="Grafana"><br>Grafana |
+
+### Flow
+
+```text
+Vue.js Admin
+  -> Spring Cloud Gateway
+  -> Spring Boot Services
+  -> SAP ECC / S/4HANA / MS-SQL
+  -> Prometheus / Grafana Monitoring
+```
+
+### Design Point
+
+- 서비스 경계를 나누어 단일 장애 지점의 영향을 줄이고, 서비스별 배포와 확장이 가능하도록 구성했습니다.
+- 서비스 이중화 환경에서 스케줄러 중복 실행을 방지하기 위해 Quartz Clustering을 적용했습니다.
+- Jenkins 기반 CI/CD와 Prometheus/Grafana 모니터링을 함께 구성해 배포 이후 운영 상태까지 추적할 수 있도록 했습니다.
+
+## My Role
+
+- MSA 기반 서비스 구조와 Gateway 구성에 참여
+- 서비스 이중화와 무중단 배포 흐름을 고려한 구조 설계
+- Jenkins 기반 CI/CD 파이프라인 구성
+- Prometheus, Grafana 기반 서비스 상태 모니터링 환경 구성
+- SAP JCo Connector를 활용한 ECC RFC 기반 데이터 연계 구현
+- S/4HANA DB 연계 및 ETL 프로세스 구축
+
+## Problem
+
+신규 서비스 개발 과정에서 운영 단계의 안정성이 주요 과제였습니다.  
+단일 장애 지점으로 전체 서비스가 중단될 수 있었고, 여러 인터페이스를 처리하는 과정에서 API 병목이 발생했습니다. 또한 서비스가 늘어나며 배포 과정과 운영 상태를 일관되게 관리하기 어려웠습니다.
+
+주요 문제는 다음과 같았습니다.
+
+- 단일 서비스 장애가 전체 서비스 중단으로 이어질 수 있는 구조
+- 다수 인터페이스 처리 과정에서 발생한 API 병목
+- 서비스 이중화 과정에서 스케줄러 중복 실행 가능성 발생
+- 수동 배포와 관리되지 않는 빌드 과정으로 인한 운영 부담
+- 서비스 상태, 메모리 사용량, 리소스 이상 징후 확인 체계 부족
+
+## Solution
+
+### 1. MSA 기반 구조와 서비스 이중화
+
+전체 서비스를 하나의 단일 구조로 두기보다 서비스 경계를 나누고, Gateway를 통해 요청 흐름을 관리하는 구조를 적용했습니다.  
+서비스 이중화를 통해 단일 장애 지점의 영향을 줄이고, 서비스별 배포와 확장이 가능하도록 구성했습니다.
+
+### 2. API 병목 개선
+
+다수 인터페이스 처리 과정에서 발생하던 API 병목을 분석하고 처리 흐름을 개선했습니다.  
+그 결과 50만 건 처리 시간이 4분 30초에서 1분 30초로 단축되었습니다.
+
+### 3. Quartz Clustering 적용
+
+서비스 이중화 이후 동일 스케줄러가 중복 실행될 수 있는 문제가 있었습니다.  
+이를 Quartz Clustering으로 해결해 중복 실행을 방지하고 안정적인 부하 분산 환경을 구성했습니다.
+
+### 4. Jenkins 기반 CI/CD 구성
+
+빌드와 배포 과정이 체계적으로 관리되지 않는 문제를 개선하기 위해 Jenkins 기반 CI/CD 파이프라인을 구성했습니다.  
+이를 통해 배포 자동화와 운영 효율을 높였습니다.
+
+### 5. Prometheus, Grafana 모니터링 구성
+
+서비스 운영 중 현재 상태와 과거 이력을 확인하기 어렵다는 점을 개선하기 위해 Prometheus와 Grafana 기반 모니터링 환경을 구성했습니다.  
+메모리 사용량, 서버 상태, 주요 리소스 지표를 확인할 수 있도록 구성해 메모리 누수와 리소스 이상 징후를 추적할 수 있는 기반을 마련했습니다.
+
+## Result
+
+- 50만 건 처리 시간 4분 30초 -> 1분 30초 단축
+- 서비스 이중화와 Gateway 구성을 통해 단일 장애 지점 완화
+- Quartz Clustering으로 스케줄러 중복 실행 문제 해결
+- Jenkins 기반 CI/CD 구성으로 배포 자동화 및 운영 효율 향상
+- Prometheus, Grafana 기반 모니터링으로 서비스 상태 가시성 확보
+- SAP ECC RFC 및 S/4HANA DB 연계 ETL 프로세스 구축
+
+## What I Learned
+
+MSA 구조는 단순히 서비스를 나누는 것이 아니라, 장애 범위, 배포 단위, 스케줄러 중복 실행, 모니터링 체계까지 함께 고려해야 한다는 점을 배웠습니다.  
+또한 기능이 정상 동작하는 것만으로는 충분하지 않고, 운영 중 서비스 상태를 확인하고 문제를 추적할 수 있는 구조가 필요하다는 점을 경험했습니다.
+
+## Interview Questions
+
+- MSA 구조에서 서비스 경계는 어떤 기준으로 나누었나요?
+- 서비스 이중화 이후 Quartz 중복 실행 문제는 왜 발생했고 어떻게 해결했나요?
+- Jenkins 파이프라인은 어떤 단계로 구성했나요?
+- Prometheus와 Grafana에서 어떤 지표를 확인했나요?
+- API 병목의 원인을 어떻게 파악했고 어떤 방식으로 개선했나요?
