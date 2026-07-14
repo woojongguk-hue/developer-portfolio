@@ -1,4 +1,4 @@
-<img width="1213" height="687" alt="image" src="https://github.com/user-attachments/assets/4a6d6355-f217-47b0-b93f-62f940b60d97" /># 데이터 연계 솔루션 구축
+# 데이터 연계 솔루션 구축
 
 ## Overview
 
